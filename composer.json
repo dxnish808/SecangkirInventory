@@ -1,0 +1,11 @@
+{
+    "name": "huawei/secangkir-inventory",
+    "autoload": {
+        "psr-4": {
+            "Huawei\\SecangkirInventory\\": "src/"
+        }
+    },
+    "require": {
+        "phpmailer/phpmailer": "^6.9"
+    }
+}
