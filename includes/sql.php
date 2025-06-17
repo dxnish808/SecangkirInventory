@@ -273,9 +273,27 @@ function tableExists($table){
  /*--------------------------------------------------------------*/
  function find_all_unverified_restock($rid = null) {
   global $db;
-  $sql = "SELECT p.name, r.product_id, r.id, r.quantity, r.date, r.status ";
-  $sql .= " FROM restock as r INNER JOIN products as p ON r.product_id = p.id";
-  $sql .= " WHERE r.status = 0"; // Fetch only unverified restock items
+  
+  // Check if the new verification_status column exists
+  $column_check = $db->query("SHOW COLUMNS FROM restock LIKE 'verification_status'");
+  
+  if ($column_check && $db->num_rows($column_check) > 0) {
+    // New schema with verification columns
+    $sql = "SELECT p.name, r.product_id, r.id, r.quantity, r.date, r.status, ";
+    $sql .= " r.verification_status, r.verified_by_1, r.verified_by_2, ";
+    $sql .= " r.verification_1_date, r.verification_2_date, ";
+    $sql .= " u1.name as verifier_1_name, u2.name as verifier_2_name ";
+    $sql .= " FROM restock as r INNER JOIN products as p ON r.product_id = p.id";
+    $sql .= " LEFT JOIN users u1 ON r.verified_by_1 = u1.id";
+    $sql .= " LEFT JOIN users u2 ON r.verified_by_2 = u2.id";
+    $sql .= " WHERE r.verification_status IN ('pending', 'partial')";
+  } else {
+    // Old schema using status column
+    $sql = "SELECT p.name, r.product_id, r.id, r.quantity, r.date, r.status ";
+    $sql .= " FROM restock as r INNER JOIN products as p ON r.product_id = p.id";
+    $sql .= " WHERE r.status = 0"; // Fetch only unverified restock items
+  }
+  
   if(!empty($rid)){
       $sql .= " AND r.id = '$rid'";
   }
@@ -368,7 +386,18 @@ function find_returns_by_dates($start_date, $end_date) {
 /*-------------------------------------------------------------------*/
 function count_unverified_restock() {
   global $db;
-  $sql = "SELECT COUNT(id) AS total FROM restock WHERE status = 0";
+  
+  // Check if the new verification_status column exists
+  $column_check = $db->query("SHOW COLUMNS FROM restock LIKE 'verification_status'");
+  
+  if ($column_check && $db->num_rows($column_check) > 0) {
+    // New schema with verification_status column
+    $sql = "SELECT COUNT(id) AS total FROM restock WHERE verification_status IN ('pending', 'partial')";
+  } else {
+    // Old schema using status column
+    $sql = "SELECT COUNT(id) AS total FROM restock WHERE status = 0";
+  }
+  
   $result = $db->query($sql);
   return ($result && $db->num_rows($result) > 0) ? $db->fetch_assoc($result) : ['total' => 0];
 }
@@ -377,11 +406,8 @@ function find_recent_returns($limit) {
   global $db;
   $sql  = "SELECT r.date, r.product_name, r.quantity, r.reason ";
   $sql .= "FROM returns r ";
-  $sql .= "ORDER BY r.date DESC LIMIT {$db->escape((int)$limit)}";
+  $sql .= "ORDER BY r.date DESC LIMIT " . $db->escape((int)$limit);
   $result = find_by_sql($sql);
-  if ($result === false) {
-    die("Database query failed: " . $db->error);
-  }
   return $result;
 }
 

@@ -50,4 +50,14 @@
       <li><a href="restock_report.php">Verified restock report </a></li>
       </ul>
   </li>
+  <li>
+    <a href="#" class="submenu-toggle">
+      <i class="glyphicon glyphicon-shield"></i>
+       <span>Security</span>
+      </a>
+      <ul class="nav submenu">
+      <li><a href="security_alerts.php">Security Alerts</a></li>
+      <li><a href="audit_log.php">Audit Log</a></li>
+      </ul>
+  </li>
 </ul>
