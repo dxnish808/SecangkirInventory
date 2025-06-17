@@ -35,6 +35,10 @@ function first_character($str){
 function validate_fields($var){
   global $errors;
   foreach ($var as $field) {
+    if(!isset($_POST[$field])){
+      $errors = $field ." is required.";
+      return $errors;
+    }
     $val = remove_junk($_POST[$field]);
     if(isset($val) && $val==''){
       $errors = $field ." can't be blank.";

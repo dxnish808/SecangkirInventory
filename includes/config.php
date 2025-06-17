@@ -12,9 +12,11 @@
 |
 |
 */
-  define( 'DB_HOST', 'localhost' );          // Set database host
-  define( 'DB_USER', 'root' );             // Set database user
-  define( 'DB_PASS', '' );             // Set database password
-  define( 'DB_NAME', 'inventory_system' );        // Set database name
+
+// Database configuration - supports both Docker and traditional setup
+define( 'DB_HOST', getenv('DB_HOST') ?: 'localhost' );          // Set database host
+define( 'DB_USER', getenv('DB_USER') ?: 'root' );             // Set database user
+define( 'DB_PASS', getenv('DB_PASS') ?: '' );                 // Set database password
+define( 'DB_NAME', getenv('DB_NAME') ?: 'inventory_system' );  // Set database name
 
 ?>

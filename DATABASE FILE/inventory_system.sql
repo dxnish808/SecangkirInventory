@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.0
+-- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: localhost:8889
--- Generation Time: Jun 05, 2024 at 05:04 AM
--- Server version: 5.7.39
--- PHP Version: 8.2.0
+-- Host: 127.0.0.1
+-- Generation Time: Jun 17, 2025 at 04:08 PM
+-- Server version: 10.4.32-MariaDB
+-- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -30,7 +30,7 @@ SET time_zone = "+00:00";
 CREATE TABLE `categories` (
   `id` int(11) UNSIGNED NOT NULL,
   `name` varchar(60) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
 -- Dumping data for table `categories`
@@ -48,18 +48,6 @@ INSERT INTO `categories` (`id`, `name`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `media`
---
-
-CREATE TABLE `media` (
-  `id` int(11) UNSIGNED NOT NULL,
-  `file_name` varchar(255) NOT NULL,
-  `file_type` varchar(100) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `products`
 --
 
@@ -68,11 +56,37 @@ CREATE TABLE `products` (
   `name` varchar(255) NOT NULL,
   `quantity` varchar(50) DEFAULT NULL,
   `buy_price` decimal(25,2) DEFAULT NULL,
-  `sale_price` decimal(25,2) NOT NULL,
   `categorie_id` int(11) UNSIGNED NOT NULL,
-  `media_id` int(11) DEFAULT '0',
+  `media_id` int(11) DEFAULT 0,
   `date` datetime NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+--
+-- Dumping data for table `products`
+--
+
+INSERT INTO `products` (`id`, `name`, `quantity`, `buy_price`, `categorie_id`, `media_id`, `date`) VALUES
+(20, 'White Bread Gardenia', '35', 3.00, 1, 0, '2025-06-01 16:27:40'),
+(21, 'Chocolate Wafer Kitkat', '40', 2.00, 2, 0, '2025-06-01 16:30:24'),
+(22, 'Oreo Cookies', '50', 2.50, 2, 0, '2025-05-03 10:45:00'),
+(23, 'Cheddar Cheese', '25', 5.00, 4, 0, '2025-05-04 11:00:00'),
+(24, 'Peanut Butter', '35', 4.00, 1, 0, '2025-05-05 12:15:00'),
+(25, 'Organic Honey', '20', 6.00, 8, 0, '2025-05-06 13:30:00'),
+(26, 'Whole Wheat Pasta', '45', 3.50, 1, 0, '2025-05-07 14:45:00'),
+(27, 'Tomato Sauce', '55', 2.75, 8, 0, '2025-05-08 15:00:00'),
+(28, 'Fresh Milk 1L', '60', 1.50, 4, 0, '2025-05-09 16:15:00'),
+(29, 'Yogurt Strawberry', '40', 2.25, 4, 0, '2025-05-10 17:30:00'),
+(30, 'Coffee Beans Arabica 500g', '70', 7.00, 3, 0, '2025-05-11 18:45:00'),
+(31, 'Butter Unsalted', '25', 4.75, 1, 0, '2025-05-12 08:00:00'),
+(32, 'Salted Crackers', '50', 1.80, 1, 0, '2025-05-13 09:15:00'),
+(33, 'Green Tea Bags', '40', 3.00, 6, 0, '2025-05-14 10:30:00'),
+(34, 'Coffee Beans Robusta 500g', '30', 6.50, 3, 0, '2025-05-15 11:45:00'),
+(35, 'Canned Tuna', '60', 2.80, 5, 0, '2025-05-16 12:00:00'),
+(36, 'Rice Cooker', '10', 50.00, 5, 0, '2025-05-17 13:15:00'),
+(37, 'Cooking Oil 1L', '80', 5.50, 8, 0, '2025-05-18 14:30:00'),
+(38, 'Frozen Peas 1kg', '50', 3.75, 1, 0, '2025-05-19 15:45:00'),
+(39, 'Fresh Carrots', '70', 1.20, 1, 0, '2025-05-20 16:00:00'),
+(40, 'Vanilla Syrup', '45', 4.50, 8, 0, '2025-05-21 17:15:00');
 
 -- --------------------------------------------------------
 
@@ -85,8 +99,16 @@ CREATE TABLE `restock` (
   `product_id` int(11) NOT NULL,
   `quantity` int(11) NOT NULL,
   `date` date NOT NULL,
-  `status` int(11) NOT NULL DEFAULT '0'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  `status` int(11) NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `restock`
+--
+
+INSERT INTO `restock` (`id`, `product_id`, `quantity`, `date`, `status`) VALUES
+(21, 20, 5, '2025-06-10', 1),
+(22, 23, 20, '2025-06-11', 0);
 
 -- --------------------------------------------------------
 
@@ -103,21 +125,14 @@ CREATE TABLE `returns` (
   `total` decimal(10,2) NOT NULL,
   `date` datetime NOT NULL,
   `reason` text NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- --------------------------------------------------------
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Table structure for table `sales`
+-- Dumping data for table `returns`
 --
 
-CREATE TABLE `sales` (
-  `id` int(11) UNSIGNED NOT NULL,
-  `product_id` int(11) UNSIGNED NOT NULL,
-  `qty` int(11) NOT NULL,
-  `price` decimal(25,2) NOT NULL,
-  `date` date NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+INSERT INTO `returns` (`id`, `restock_id`, `product_name`, `quantity`, `price_per_unit`, `total`, `date`, `reason`) VALUES
+(14, 21, 'White Bread Gardenia', 5, 0.00, 0.00, '2025-06-01 22:36:41', 'Mismatch');
 
 -- --------------------------------------------------------
 
@@ -133,16 +148,18 @@ CREATE TABLE `users` (
   `user_level` int(11) NOT NULL,
   `image` varchar(255) DEFAULT 'no_image.jpg',
   `status` int(1) NOT NULL,
-  `last_login` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+  `last_login` datetime DEFAULT NULL,
+  `failed_attempts` int(11) DEFAULT 0,
+  `locked_until` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 --
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `name`, `username`, `password`, `user_level`, `image`, `status`, `last_login`) VALUES
-(1, 'Nasrullah', 'Nas', '40bd001563085fc35165329ea1ff5c5ecbdbbeef', 1, '753h0dpa1.png', 1, '2024-06-05 04:04:09'),
-(7, 'Danish aqil', 'Danish', '40bd001563085fc35165329ea1ff5c5ecbdbbeef', 2, 'no_image.jpg', 1, '2024-06-05 03:15:13');
+INSERT INTO `users` (`id`, `name`, `username`, `password`, `user_level`, `image`, `status`, `last_login`, `failed_attempts`, `locked_until`) VALUES
+(1, 'Nasrullah', 'Nas', '227c1900a7759609b62da011740e60a1b2477386', 1, '6a69rdpu1.jpg', 1, '2025-06-17 15:53:15', 0, NULL),
+(9, 'Danish Aqil', 'danish', '227c1900a7759609b62da011740e60a1b2477386', 2, 'isc6a1j89.jpg', 1, '2025-06-17 15:46:43', 5, '2025-06-17 16:02:28');
 
 -- --------------------------------------------------------
 
@@ -155,7 +172,7 @@ CREATE TABLE `user_groups` (
   `group_name` varchar(150) NOT NULL,
   `group_level` int(11) NOT NULL,
   `group_status` int(1) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 --
 -- Dumping data for table `user_groups`
@@ -165,6 +182,9 @@ INSERT INTO `user_groups` (`id`, `group_name`, `group_level`, `group_status`) VA
 (1, 'Admin', 1, 1),
 (2, 'Employee', 2, 1);
 
+--
+-- Indexes for dumped tables
+--
 
 --
 -- Indexes for table `categories`
@@ -172,13 +192,6 @@ INSERT INTO `user_groups` (`id`, `group_name`, `group_level`, `group_status`) VA
 ALTER TABLE `categories`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `name` (`name`);
-
---
--- Indexes for table `media`
---
-ALTER TABLE `media`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `id` (`id`);
 
 --
 -- Indexes for table `products`
@@ -201,13 +214,6 @@ ALTER TABLE `restock`
 ALTER TABLE `returns`
   ADD PRIMARY KEY (`id`),
   ADD KEY `restock_id` (`restock_id`);
-
---
--- Indexes for table `sales`
---
-ALTER TABLE `sales`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `product_id` (`product_id`);
 
 --
 -- Indexes for table `users`
@@ -234,40 +240,28 @@ ALTER TABLE `categories`
   MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
--- AUTO_INCREMENT for table `media`
---
-ALTER TABLE `media`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT for table `products`
 --
 ALTER TABLE `products`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
 
 --
 -- AUTO_INCREMENT for table `restock`
 --
 ALTER TABLE `restock`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT for table `returns`
 --
 ALTER TABLE `returns`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
-
---
--- AUTO_INCREMENT for table `sales`
---
-ALTER TABLE `sales`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `user_groups`
@@ -290,12 +284,6 @@ ALTER TABLE `products`
 --
 ALTER TABLE `returns`
   ADD CONSTRAINT `returns_ibfk_1` FOREIGN KEY (`restock_id`) REFERENCES `restock` (`id`);
-
---
--- Constraints for table `sales`
---
-ALTER TABLE `sales`
-  ADD CONSTRAINT `SK` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `users`

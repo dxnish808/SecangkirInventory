@@ -1,5 +1,13 @@
-<?php include_once('includes/load.php'); ?>
-<?php
+<?php 
+ob_start();
+include_once('includes/load.php'); 
+
+// Check if this is a POST request
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    ob_end_clean();
+    redirect('index.php', false);
+}
+
 $req_fields = array('username','password' );
 validate_fields($req_fields);
 $username = remove_junk($_POST['username']);
@@ -14,15 +22,19 @@ if(empty($errors)){
   }
 
   // Check if account is locked
-  if (isset($user['locked_until']) && strtotime($user['locked_until']) > time()) {
+  if (isset($user['locked_until']) && $user['locked_until'] && strtotime($user['locked_until']) > time()) {
     $session->msg("d", "Account locked. Try again later.");
     redirect('index.php', false);
   }
 
   // Check password
   if(sha1($password) === $user['password']){
-    // Reset failed attempts on successful login
-    $db->query("UPDATE users SET failed_attempts=0, locked_until=NULL WHERE id='{$user['id']}'");
+    // Reset failed attempts on successful login (only if columns exist)
+    try {
+      $db->query("UPDATE users SET failed_attempts=0, locked_until=NULL WHERE id='{$user['id']}'");
+    } catch (Exception $e) {
+      // Columns don't exist yet, ignore the error
+    }
     $session->login($user['id']);
     updateLastLogIn($user['id']);
     $session->msg("s", "Welcome to Inventory Management System");
@@ -41,16 +53,21 @@ if(empty($errors)){
         redirect('home.php', false);
     }
   } else {
-    // Increment failed attempts
-    $failed_attempts = (int)$user['failed_attempts'] + 1;
-    $lockout_time = 15 * 60; // 15 minutes
-    if($failed_attempts >= 5){
-      $locked_until = date('Y-m-d H:i:s', time() + $lockout_time);
-      $db->query("UPDATE users SET failed_attempts='{$failed_attempts}', locked_until='{$locked_until}' WHERE id='{$user['id']}'");
-      $session->msg("d", "Account locked due to too many failed attempts. Try again in 15 minutes.");
-    } else {
-      $db->query("UPDATE users SET failed_attempts='{$failed_attempts}' WHERE id='{$user['id']}'");
-      $session->msg("d", "Sorry Username/Password incorrect. Attempt $failed_attempts of 5.");
+    // Increment failed attempts (only if columns exist)
+    try {
+      $failed_attempts = (isset($user['failed_attempts']) ? (int)$user['failed_attempts'] : 0) + 1;
+      $lockout_time = 15 * 60; // 15 minutes
+      if($failed_attempts >= 5){
+        $locked_until = date('Y-m-d H:i:s', time() + $lockout_time);
+        $db->query("UPDATE users SET failed_attempts='{$failed_attempts}', locked_until='{$locked_until}' WHERE id='{$user['id']}'");
+        $session->msg("d", "Account locked due to too many failed attempts. Try again in 15 minutes.");
+      } else {
+        $db->query("UPDATE users SET failed_attempts='{$failed_attempts}' WHERE id='{$user['id']}'");
+        $session->msg("d", "Sorry Username/Password incorrect. Attempt $failed_attempts of 5.");
+      }
+    } catch (Exception $e) {
+      // Columns don't exist yet, show generic error
+      $session->msg("d", "Sorry Username/Password incorrect.");
     }
     redirect('index.php',false);
   }

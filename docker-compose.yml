@@ -1,0 +1,67 @@
+services:
+  # PHP Application with Apache
+  web:
+    build: .
+    container_name: secangkir_web
+    ports:
+      - "8090:80"
+    volumes:
+      - .:/var/www/html
+      - ./uploads:/var/www/html/uploads
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_USER=root
+      - DB_PASS=rootpassword
+      - DB_NAME=inventory_system
+    networks:
+      - secangkir_network
+
+  # MySQL Database
+  db:
+    image: mysql:8.0
+    platform: linux/amd64
+    container_name: secangkir_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: inventory_system
+      MYSQL_USER: inventory_user
+      MYSQL_PASSWORD: inventory_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./DATABASE FILE/inventory_system.sql:/docker-entrypoint-initdb.d/01-inventory_system.sql
+    networks:
+      - secangkir_network
+
+  # phpMyAdmin for database management
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    platform: linux/amd64
+    container_name: secangkir_phpmyadmin
+    restart: always
+    ports:
+      - "8091:80"
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: rootpassword
+      MYSQL_ROOT_PASSWORD: rootpassword
+    depends_on:
+      - db
+    networks:
+      - secangkir_network
+
+# Named volumes
+volumes:
+  mysql_data:
+    driver: local
+
+# Networks
+networks:
+  secangkir_network:
+    driver: bridge 

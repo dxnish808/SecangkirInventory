@@ -29,6 +29,7 @@ class Session {
   }
   public function logout(){
     unset($_SESSION['user_id']);
+    return true;
   }
 
   public function msg($type ='', $msg =''){
